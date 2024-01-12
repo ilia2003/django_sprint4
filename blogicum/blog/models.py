@@ -1,3 +1,5 @@
+from django.contrib.auth import get_user_model
+
 from django.db.models import (
     Model,
     CharField,
@@ -10,7 +12,6 @@ from django.db.models import (
     SET_NULL,
     CASCADE
 )
-from django.contrib.auth import get_user_model
 
 
 MAX_LENGTH_CHARS = 256
@@ -23,8 +24,7 @@ def cut_str(func,
         str_res = func(*args)
         if len(str_res) < length:
             return str_res
-        else:
-            return str_res[:length] + '...'
+        return str_res[:length] + '...'
     return wrapper
 
 
@@ -65,9 +65,11 @@ class Category(PublishedCreatedModel):
     description = TextField(verbose_name='Описание')
     slug = SlugField(unique=True,
                      verbose_name='Идентификатор',
-                     help_text='Идентификатор страницы для URL; '
-                               'разрешены символы латиницы, цифры, '
-                               'дефис и подчёркивание.')
+                     help_text=(
+                         'Идентификатор страницы для URL; '
+                         'разрешены символы латиницы, цифры, дефис '
+                         'и подчёркивание.'
+                     ))
 
     class Meta:
         verbose_name = 'категория'
@@ -82,27 +84,37 @@ class Post(PublishedCreatedModel):
     title = CharField(max_length=MAX_LENGTH_CHARS,
                       verbose_name='Заголовок')
     text = TextField(verbose_name='Текст')
-    image = ImageField(verbose_name='Фото',
-                       upload_to='posts_images',
-                       blank=True)
-    pub_date = DateTimeField(verbose_name='Дата и время публикации',
-                             help_text='Если установить '
-                                       'дату и время в будущем — '
-                                       'можно делать отложенные публикации.')
-    author = ForeignKey(get_user_model(),
-                        related_name='posts',
-                        on_delete=CASCADE,
-                        verbose_name='Автор публикации')
-    location = ForeignKey(Location,
-                          related_name='posts',
-                          on_delete=SET_NULL,
-                          null=True,
-                          verbose_name='Местоположение')
-    category = ForeignKey(Category,
-                          related_name='posts',
-                          on_delete=SET_NULL,
-                          null=True,
-                          verbose_name='Категория')
+    image = ImageField(
+        verbose_name='Фото',
+        upload_to='posts_images',
+        blank=True
+    )
+    pub_date = DateTimeField(
+        verbose_name='Дата и время публикации',
+        help_text='Если установить '
+        'дату и время в будущем — '
+        'можно делать отложенные публикации.'
+    )
+    author = ForeignKey(
+        get_user_model(),
+        related_name='posts',
+        on_delete=CASCADE,
+        verbose_name='Автор публикации'
+    )
+    location = ForeignKey(
+        Location,
+        related_name='posts',
+        on_delete=SET_NULL,
+        null=True,
+        verbose_name='Местоположение'
+    )
+    category = ForeignKey(
+        Category,
+        related_name='posts',
+        on_delete=SET_NULL,
+        null=True,
+        verbose_name='Категория'
+    )
 
     class Meta:
         ordering = ('-pub_date',)

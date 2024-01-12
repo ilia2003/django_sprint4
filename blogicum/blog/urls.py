@@ -23,7 +23,7 @@ posts_urls = [
     path('<int:post_id>/',
          views.PostDetailView.as_view(), name='post_detail'),
 
-    path('<slug:post_id>/comment/',
+    path('<int:post_id>/comment/',
          views.CommentCreateView.as_view(), name='add_comment'),
     path('<slug:post_id>/edit_comment/<int:comment_id>/',
          views.CommentUpdateView.as_view(), name='edit_comment'),

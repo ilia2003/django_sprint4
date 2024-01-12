@@ -1,6 +1,11 @@
-from datetime import datetime as dt
+from .forms import PostModelForm, CommentModelForm
+from .models import Post, Category, Comment
 
-from django.db.models import QuerySet
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.views.generic import (
     DetailView,
     UpdateView,
@@ -8,64 +13,18 @@ from django.views.generic import (
     CreateView,
     DeleteView,
 )
-from django.contrib.auth import get_user_model
-from django.urls import reverse
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect
-from django.db.models import Count
 
-from .models import Post, Category, Comment
-from .forms import PostModelForm, CommentModelForm
+from datetime import datetime as dt
 
+from .mixin import (
+    GetPostDetailUrlMixin,
+    CommentModificationPermissionMixin,
+    PostModificationPermissionMixin
+)
+from .utils import get_posts
 
 User = get_user_model()
-
-
-class GetPostDetailUrlMixin:
-
-    def get_success_url(self):
-        return reverse('blog:post_detail',
-                       args=[self.kwargs['post_id']])
-
-
-class CommentModificationPermissionMixin(LoginRequiredMixin,
-                                         GetPostDetailUrlMixin):
-
-    def dispatch(self, request, *args, **kwargs):
-        comment = get_object_or_404(Comment,
-                                    id=kwargs['comment_id'],
-                                    post_id=kwargs['post_id'])
-        if request.user != comment.author:
-            return redirect(self.get_success_url(), permanent=True)
-        return super().dispatch(request, *args, **kwargs)
-
-
-class PostModificationPermissionMixin(LoginRequiredMixin,
-                                      GetPostDetailUrlMixin):
-
-    def dispatch(self, request, *args, **kwargs):
-        author = self.get_object().author
-        auth_user = request.user
-        if auth_user != author:
-            return redirect(self.get_success_url(),
-                            permanent=True)
-        return super().dispatch(request, *args, **kwargs)
-
-
-def get_posts(to_filter: bool = False,
-              count_comments: bool = False) -> QuerySet:
-    posts = Post.objects.select_related('author', 'category', 'location')
-    if to_filter:
-        posts = (posts
-                 .filter(is_published=True,
-                         pub_date__lte=dt.now(),
-                         category__is_published=True))
-    if count_comments:
-        posts = (posts
-                 .annotate(comment_count=Count('comments'))
-                 .order_by("-pub_date"))
-    return posts
+POSTINPAGE = 10
 
 
 class ProfileDetailView(ListView):
@@ -73,7 +32,7 @@ class ProfileDetailView(ListView):
     template_name = 'blog/profile.html'
     slug_field = 'username'
     slug_url_kwarg = 'username'
-    paginate_by = 10
+    paginate_by = POSTINPAGE
 
     def get_author(self) -> User:
         return get_object_or_404(User, username=self.kwargs['username'])
@@ -86,9 +45,9 @@ class ProfileDetailView(ListView):
                 .filter(author=author))
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['profile'] = self.get_author()
-        return ctx
+        ontext_data = super().get_context_data(**kwargs)
+        ontext_data['profile'] = self.get_author()
+        return ontext_data
 
 
 class ProfileUpdateView(LoginRequiredMixin,
@@ -135,14 +94,12 @@ class PostUpdateView(PostModificationPermissionMixin,
     model = Post
     form_class = PostModelForm
     template_name = 'blog/create.html'
-    pk_url_kwarg = 'post_id'
-    post_id_kwarg = 'post_id'
 
 
 class PostListView(ListView):
     model = Post
     template_name = 'blog/index.html'
-    paginate_by = 10
+    paginate_by = POSTINPAGE
     queryset = get_posts(to_filter=True,
                          count_comments=True)
 
@@ -190,10 +147,10 @@ class CategoryDetailView(ListView):
                 .filter(category=category))
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
+        context_data = super().get_context_data(**kwargs)
         category = self.get_category()
-        ctx['category'] = category
-        return ctx
+        context_data['category'] = category
+        return context_data
 
 
 class CommentCreateView(LoginRequiredMixin,
@@ -221,7 +178,6 @@ class CommentUpdateView(CommentModificationPermissionMixin,
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
     slug_url_kwarg = 'post_id'
-    fields = ['text']
 
 
 class CommentDeleteView(CommentModificationPermissionMixin,
@@ -230,4 +186,3 @@ class CommentDeleteView(CommentModificationPermissionMixin,
     pk_url_kwarg = 'comment_id'
     slug_url_kwarg = 'post_id'
     template_name = 'blog/comment.html'
-    context_object_name = 'comment'
