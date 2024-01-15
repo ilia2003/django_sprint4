@@ -181,7 +181,7 @@ class CommentUpdateView(CommentModificationPermissionMixin,
     fields = ['text']
 
 
-class CommentDeleteView(CommentModificationPermissionMixin, 
+class CommentDeleteView(CommentModificationPermissionMixin,
                         DeleteView):
     model = Comment
     pk_url_kwarg = 'comment_id'
