@@ -178,9 +178,10 @@ class CommentUpdateView(CommentModificationPermissionMixin,
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
     slug_url_kwarg = 'post_id'
+    fields = ['text']
 
 
-class CommentDeleteView(CommentModificationPermissionMixin,
+class CommentDeleteView(CommentModificationPermissionMixin, 
                         DeleteView):
     model = Comment
     pk_url_kwarg = 'comment_id'
