@@ -1,6 +1,7 @@
-from django.db.models import QuerySet, Count
 from .models import Post
-from datetime import datetime as dt
+
+from django.db.models import QuerySet, Count
+from django.utils import timezone as dt
 
 
 def get_posts(to_filter: bool = False,

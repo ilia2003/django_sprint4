@@ -1,11 +1,19 @@
 from .forms import PostModelForm, CommentModelForm
+from .mixin import (
+    CommentModificationPermissionMixin,
+    PostModificationPermissionMixin,
+    GetPostDetailUrlMixin,
+)
 from .models import Post, Category, Comment
+from .utils import get_posts
+
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils import timezone as dt
 from django.views.generic import (
     DetailView,
     UpdateView,
@@ -13,15 +21,6 @@ from django.views.generic import (
     CreateView,
     DeleteView,
 )
-
-from datetime import datetime as dt
-
-from .mixin import (
-    GetPostDetailUrlMixin,
-    CommentModificationPermissionMixin,
-    PostModificationPermissionMixin
-)
-from .utils import get_posts
 
 User = get_user_model()
 POSTINPAGE = 10
@@ -79,21 +78,19 @@ class PostCreateView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class PostDeleteView(PostModificationPermissionMixin,
+class PostDeleteView(LoginRequiredMixin,
+                     PostModificationPermissionMixin,
                      DeleteView):
-    model = Post
-    pk_url_kwarg = 'post_id'
-    template_name = 'blog/create.html'
+    pass
 
     def get_success_url(self):
         return reverse('blog:index')
 
 
-class PostUpdateView(PostModificationPermissionMixin,
+class PostUpdateView(LoginRequiredMixin,
+                     PostModificationPermissionMixin,
                      UpdateView):
-    model = Post
-    form_class = PostModelForm
-    template_name = 'blog/create.html'
+    pass
 
 
 class PostListView(ListView):
@@ -121,19 +118,19 @@ class PostDetailView(DetailView):
         return post
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        post = ctx['post']
-        ctx['comments'] = (Comment.objects.select_related('author')
-                           .filter(post=post))
-        ctx['form'] = CommentModelForm()
-        return ctx
+        context_data = super().get_context_data(**kwargs)
+        post = context_data['post']
+        context_data['comments'] = (Comment.objects.select_related('author')
+                                    .filter(post=post))
+        context_data['form'] = CommentModelForm()
+        return context_data
 
 
 class CategoryDetailView(ListView):
     model = Category
     template_name = 'blog/category.html'
     slug_url_kwarg = 'category_slug'
-    paginate_by = 10
+    paginate_by = POSTINPAGE
 
     def get_category(self):
         return get_object_or_404(Category,
@@ -171,19 +168,13 @@ class CommentCreateView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class CommentUpdateView(CommentModificationPermissionMixin,
+class CommentUpdateView(LoginRequiredMixin,
+                        CommentModificationPermissionMixin,
                         UpdateView):
-    model = Comment
-    form = CommentModelForm
-    template_name = 'blog/comment.html'
-    pk_url_kwarg = 'comment_id'
-    slug_url_kwarg = 'post_id'
-    fields = ['text']
+    pass
 
 
-class CommentDeleteView(CommentModificationPermissionMixin,
+class CommentDeleteView(LoginRequiredMixin,
+                        CommentModificationPermissionMixin,
                         DeleteView):
-    model = Comment
-    pk_url_kwarg = 'comment_id'
-    slug_url_kwarg = 'post_id'
-    template_name = 'blog/comment.html'
+    pass

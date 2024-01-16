@@ -1,18 +1,23 @@
-from django.urls import reverse
-from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Comment
+from .forms import CommentModelForm
+from .models import Comment, Post
+
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 
 
-class GetPostDetailUrlMixin:
+class GetPostDetailUrlMixin():
 
     def get_success_url(self):
         return reverse('blog:post_detail',
                        args=[self.kwargs['post_id']])
 
 
-class CommentModificationPermissionMixin(GetPostDetailUrlMixin,
-                                         LoginRequiredMixin):
+class CommentModificationPermissionMixin(GetPostDetailUrlMixin):
+    model = Comment
+    form = CommentModelForm
+    template_name = 'blog/comment.html'
+    pk_url_kwarg = 'comment_id'
+    slug_url_kwarg = 'post_id'
 
     def dispatch(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment,
@@ -23,9 +28,11 @@ class CommentModificationPermissionMixin(GetPostDetailUrlMixin,
         return super().dispatch(request, *args, **kwargs)
 
 
-class PostModificationPermissionMixin(GetPostDetailUrlMixin,
-                                      LoginRequiredMixin,):
+class PostModificationPermissionMixin(GetPostDetailUrlMixin):
     pk_url_kwarg = 'post_id'
+    model = Post
+    pk_url_kwarg = 'post_id'
+    template_name = 'blog/create.html'
 
     def dispatch(self, request, *args, **kwargs):
         author = self.get_object().author

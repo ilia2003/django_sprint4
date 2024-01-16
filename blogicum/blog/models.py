@@ -1,31 +1,20 @@
-from django.contrib.auth import get_user_model
+from .decorators import cut_str
 
+from django.contrib.auth import get_user_model
 from django.db.models import (
-    Model,
-    CharField,
-    TextField,
-    SlugField,
-    DateTimeField,
     BooleanField,
+    CharField,
+    DateTimeField,
     ForeignKey,
     ImageField,
+    Model,
+    SlugField,
+    TextField,
     SET_NULL,
     CASCADE
 )
 
-
 MAX_LENGTH_CHARS = 256
-STR_CLASS_LENGHT = 20
-
-
-def cut_str(func,
-            length: int = STR_CLASS_LENGHT):
-    def wrapper(*args):
-        str_res = func(*args)
-        if len(str_res) < length:
-            return str_res
-        return str_res[:length] + '...'
-    return wrapper
 
 
 class CreatedModel(Model):
@@ -91,9 +80,11 @@ class Post(PublishedCreatedModel):
     )
     pub_date = DateTimeField(
         verbose_name='Дата и время публикации',
-        help_text='Если установить '
-        'дату и время в будущем — '
-        'можно делать отложенные публикации.'
+        help_text=(
+            'Если установить '
+            'дату и время в будущем — '
+            'можно делать отложенные публикации.'
+        )
     )
     author = ForeignKey(
         get_user_model(),
