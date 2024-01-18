@@ -1,19 +1,18 @@
 from .forms import PostModelForm, CommentModelForm
-from .mixin import (
-    CommentModificationPermissionMixin,
-    PostModificationPermissionMixin,
-    GetPostDetailUrlMixin,
-)
 from .models import Post, Category, Comment
+from .mixin import (
+    GetPostDetailUrlMixin,
+    CommentModificationPermissionMixin,
+    PostModificationPermissionMixin
+)
 from .utils import get_posts
-
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils import timezone as dt
+from django.utils import timezone
 from django.views.generic import (
     DetailView,
     UpdateView,
@@ -22,6 +21,7 @@ from django.views.generic import (
     DeleteView,
 )
 
+NOW = timezone.now()
 User = get_user_model()
 POSTINPAGE = 10
 
@@ -34,6 +34,7 @@ class ProfileDetailView(ListView):
     paginate_by = POSTINPAGE
 
     def get_author(self) -> User:
+
         return get_object_or_404(User, username=self.kwargs['username'])
 
     def get_queryset(self):
@@ -78,8 +79,7 @@ class PostCreateView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class PostDeleteView(LoginRequiredMixin,
-                     PostModificationPermissionMixin,
+class PostDeleteView(PostModificationPermissionMixin,
                      DeleteView):
     pass
 
@@ -87,8 +87,7 @@ class PostDeleteView(LoginRequiredMixin,
         return reverse('blog:index')
 
 
-class PostUpdateView(LoginRequiredMixin,
-                     PostModificationPermissionMixin,
+class PostUpdateView(PostModificationPermissionMixin,
                      UpdateView):
     pass
 
@@ -113,7 +112,7 @@ class PostDetailView(DetailView):
         if (author != auth_user
                 and (not post.is_published
                      or not post.category.is_published
-                     or post.pub_date > dt.now(tz=post.pub_date.tzinfo))):
+                     or post.pub_date > NOW.now(tz=post.pub_date.tzinfo))):
             raise Http404('Пост не найден')
         return post
 
@@ -168,13 +167,16 @@ class CommentCreateView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class CommentUpdateView(LoginRequiredMixin,
-                        CommentModificationPermissionMixin,
+class CommentUpdateView(CommentModificationPermissionMixin,
                         UpdateView):
-    pass
+    fields = ['text']
+    model = Comment
+    form = CommentModelForm
+    template_name = 'blog/comment.html'
+    pk_url_kwarg = 'comment_id'
+    slug_url_kwarg = 'post_id'
 
 
-class CommentDeleteView(LoginRequiredMixin,
-                        CommentModificationPermissionMixin,
+class CommentDeleteView(CommentModificationPermissionMixin,
                         DeleteView):
     pass

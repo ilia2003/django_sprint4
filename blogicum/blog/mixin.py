@@ -1,4 +1,4 @@
-from .forms import CommentModelForm
+from .forms import CommentModelForm, PostModelForm
 from .models import Comment, Post
 
 from django.shortcuts import get_object_or_404, redirect
@@ -29,10 +29,10 @@ class CommentModificationPermissionMixin(GetPostDetailUrlMixin):
 
 
 class PostModificationPermissionMixin(GetPostDetailUrlMixin):
-    pk_url_kwarg = 'post_id'
     model = Post
     pk_url_kwarg = 'post_id'
     template_name = 'blog/create.html'
+    form_class = PostModelForm
 
     def dispatch(self, request, *args, **kwargs):
         author = self.get_object().author
