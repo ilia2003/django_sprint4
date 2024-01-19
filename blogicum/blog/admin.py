@@ -1,6 +1,6 @@
-from .models import Category, Location, Post, Comment
-
 from django.contrib import admin
+
+from .models import Category, Location, Post, Comment
 
 
 class PostInline(admin.StackedInline):

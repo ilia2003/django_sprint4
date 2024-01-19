@@ -1,9 +1,8 @@
-from .models import Post, Comment
-
 from django.contrib.auth import get_user_model
-from django.forms.models import ModelForm
 from django.forms import DateTimeInput
+from django.forms.models import ModelForm
 
+from .models import Post, Comment
 
 User = get_user_model()
 

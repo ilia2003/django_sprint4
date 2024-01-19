@@ -1,8 +1,8 @@
-from .forms import CommentModelForm, PostModelForm
-from .models import Comment, Post
-
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+
+from .forms import CommentModelForm, PostModelForm
+from .models import Comment, Post
 
 
 class GetPostDetailUrlMixin():
@@ -13,6 +13,7 @@ class GetPostDetailUrlMixin():
 
 
 class CommentModificationPermissionMixin(GetPostDetailUrlMixin):
+    fields = ['text']
     model = Comment
     form = CommentModelForm
     template_name = 'blog/comment.html'

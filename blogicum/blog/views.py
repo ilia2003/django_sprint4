@@ -1,3 +1,17 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    UpdateView,
+    ListView,
+)
+
 from .forms import PostModelForm, CommentModelForm
 from .models import Post, Category, Comment
 from .mixin import (
@@ -7,21 +21,6 @@ from .mixin import (
 )
 from .utils import get_posts
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
-from django.shortcuts import get_object_or_404
-from django.urls import reverse
-from django.utils import timezone
-from django.views.generic import (
-    DetailView,
-    UpdateView,
-    ListView,
-    CreateView,
-    DeleteView,
-)
-
-NOW = timezone.now()
 User = get_user_model()
 POSTINPAGE = 10
 
@@ -79,9 +78,9 @@ class PostCreateView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class PostDeleteView(PostModificationPermissionMixin,
+class PostDeleteView(LoginRequiredMixin,
+                     PostModificationPermissionMixin,
                      DeleteView):
-    pass
 
     def get_success_url(self):
         return reverse('blog:index')
@@ -112,7 +111,7 @@ class PostDetailView(DetailView):
         if (author != auth_user
                 and (not post.is_published
                      or not post.category.is_published
-                     or post.pub_date > NOW.now(tz=post.pub_date.tzinfo))):
+                     or post.pub_date > timezone.now())):
             raise Http404('Пост не найден')
         return post
 
