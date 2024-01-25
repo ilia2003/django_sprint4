@@ -1,4 +1,4 @@
-from django.db.models import QuerySet, Count
+from django.db.models import Count, QuerySet
 from django.utils import timezone
 
 from .models import Post

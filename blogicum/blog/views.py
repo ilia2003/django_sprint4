@@ -8,19 +8,20 @@ from django.views.generic import (
     CreateView,
     DeleteView,
     DetailView,
-    UpdateView,
     ListView,
+    UpdateView,
 )
 
-from .forms import PostModelForm, CommentModelForm
-from .models import Post, Category, Comment
+from .forms import CommentModelForm, PostModelForm
+from .models import Category, Comment, Post
 from .mixin import (
-    GetPostDetailUrlMixin,
     CommentModificationPermissionMixin,
+    GetPostDetailUrlMixin,
     PostModificationPermissionMixin
 )
 from .utils import get_posts
 
+NOW = timezone.now()
 User = get_user_model()
 POSTINPAGE = 10
 
@@ -86,7 +87,8 @@ class PostDeleteView(LoginRequiredMixin,
         return reverse('blog:index')
 
 
-class PostUpdateView(PostModificationPermissionMixin,
+class PostUpdateView(LoginRequiredMixin,
+                     PostModificationPermissionMixin,
                      UpdateView):
     pass
 
@@ -111,7 +113,7 @@ class PostDetailView(DetailView):
         if (author != auth_user
                 and (not post.is_published
                      or not post.category.is_published
-                     or post.pub_date > timezone.now())):
+                     or post.pub_date > NOW.now(tz=post.pub_date.tzinfo))):
             raise Http404('Пост не найден')
         return post
 
@@ -166,16 +168,13 @@ class CommentCreateView(LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class CommentUpdateView(CommentModificationPermissionMixin,
+class CommentUpdateView(LoginRequiredMixin,
+                        CommentModificationPermissionMixin,
                         UpdateView):
-    fields = ['text']
-    model = Comment
-    form = CommentModelForm
-    template_name = 'blog/comment.html'
-    pk_url_kwarg = 'comment_id'
-    slug_url_kwarg = 'post_id'
+    pass
 
 
-class CommentDeleteView(CommentModificationPermissionMixin,
+class CommentDeleteView(LoginRequiredMixin,
+                        CommentModificationPermissionMixin,
                         DeleteView):
     pass

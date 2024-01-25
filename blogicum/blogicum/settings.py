@@ -6,8 +6,6 @@ SECRET_KEY = 'django-insecure-00auc+ypb2omvaedi14-^n0qvl3q%k$oighdo-2oocdk3ew4lw
 
 CSRF_FAILURE_VIEW = 'pages.views.csrf_exception'
 
-LOGIN_REDIRECT_URL = 'blog:index'
-
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
@@ -94,6 +92,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'ru-RU'
+
+LOGIN_URL = 'login'
 
 TIME_ZONE = 'UTC'
 

@@ -13,9 +13,8 @@ class GetPostDetailUrlMixin():
 
 
 class CommentModificationPermissionMixin(GetPostDetailUrlMixin):
-    fields = ['text']
     model = Comment
-    form = CommentModelForm
+    form_class = CommentModelForm
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
     slug_url_kwarg = 'post_id'

@@ -1,5 +1,3 @@
-from .decorators import cut_str
-
 from django.contrib.auth import get_user_model
 from django.db.models import (
     BooleanField,
@@ -13,6 +11,8 @@ from django.db.models import (
     SET_NULL,
     CASCADE
 )
+
+from .decorators import cut_str
 
 MAX_LENGTH_CHARS = 256
 
