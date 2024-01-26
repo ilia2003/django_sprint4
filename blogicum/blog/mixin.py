@@ -5,7 +5,7 @@ from .forms import CommentModelForm, PostModelForm
 from .models import Comment, Post
 
 
-class GetPostDetailUrlMixin():
+class GetPostDetailUrlMixin:
 
     def get_success_url(self):
         return reverse('blog:post_detail',

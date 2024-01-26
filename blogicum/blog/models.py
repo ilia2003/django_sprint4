@@ -2,14 +2,14 @@ from django.contrib.auth import get_user_model
 from django.db.models import (
     BooleanField,
     CharField,
+    CASCADE,
     DateTimeField,
     ForeignKey,
     ImageField,
     Model,
     SlugField,
-    TextField,
     SET_NULL,
-    CASCADE
+    TextField,
 )
 
 from .decorators import cut_str

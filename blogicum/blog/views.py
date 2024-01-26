@@ -21,7 +21,6 @@ from .mixin import (
 )
 from .utils import get_posts
 
-NOW = timezone.now()
 User = get_user_model()
 POSTINPAGE = 10
 
@@ -85,6 +84,11 @@ class PostDeleteView(LoginRequiredMixin,
 
     def get_success_url(self):
         return reverse('blog:index')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = {'instance': self.object}
+        return context
 
 
 class PostUpdateView(LoginRequiredMixin,
@@ -113,7 +117,7 @@ class PostDetailView(DetailView):
         if (author != auth_user
                 and (not post.is_published
                      or not post.category.is_published
-                     or post.pub_date > NOW.now(tz=post.pub_date.tzinfo))):
+                     or post.pub_date > timezone.now())):
             raise Http404('Пост не найден')
         return post
 
