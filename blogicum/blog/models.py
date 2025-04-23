@@ -19,7 +19,7 @@ MAX_LENGTH_CHARS = 256
 
 class CreatedModel(Model):
     created_at = DateTimeField(auto_now_add=True,
-                               verbose_name='Добавлено')
+                               verbose_name='Added')
 
     class Meta:
         abstract = True
@@ -27,9 +27,9 @@ class CreatedModel(Model):
 
 class PublishedCreatedModel(CreatedModel):
     is_published = BooleanField(default=True,
-                                verbose_name='Опубликовано',
-                                help_text='Снимите галочку, '
-                                          'чтобы скрыть публикацию.')
+                                verbose_name='Published',
+                                help_text='Uncheck the box to '
+                                'hide the post.')
 
     class Meta:
         abstract = True
@@ -37,11 +37,11 @@ class PublishedCreatedModel(CreatedModel):
 
 class Location(PublishedCreatedModel):
     name = CharField(max_length=MAX_LENGTH_CHARS,
-                     verbose_name='Название места')
+                     verbose_name='Place name')
 
     class Meta:
-        verbose_name = 'местоположение'
-        verbose_name_plural = 'Местоположения'
+        verbose_name = 'locations'
+        verbose_name_plural = 'Locations'
 
     @cut_str
     def __str__(self):
@@ -50,19 +50,16 @@ class Location(PublishedCreatedModel):
 
 class Category(PublishedCreatedModel):
     title = CharField(max_length=MAX_LENGTH_CHARS,
-                      verbose_name='Заголовок')
-    description = TextField(verbose_name='Описание')
+                      verbose_name='Heading')
+    description = TextField(verbose_name='Description')
     slug = SlugField(unique=True,
-                     verbose_name='Идентификатор',
-                     help_text=(
-                         'Идентификатор страницы для URL; '
-                         'разрешены символы латиницы, цифры, дефис '
-                         'и подчёркивание.'
-                     ))
+                     verbose_name='Identifier',
+                     help_text=('Page ID for URL; Latin characters, numbers,'
+                                'hyphens and underscores are allowed.'))
 
     class Meta:
-        verbose_name = 'категория'
-        verbose_name_plural = 'Категории'
+        verbose_name = 'category'
+        verbose_name_plural = 'Category'
 
     @cut_str
     def __str__(self):
@@ -71,46 +68,45 @@ class Category(PublishedCreatedModel):
 
 class Post(PublishedCreatedModel):
     title = CharField(max_length=MAX_LENGTH_CHARS,
-                      verbose_name='Заголовок')
-    text = TextField(verbose_name='Текст')
+                      verbose_name='Heading')
+    text = TextField(verbose_name='Text')
     image = ImageField(
-        verbose_name='Фото',
+        verbose_name='Photo',
         upload_to='posts_images',
         blank=True
     )
     pub_date = DateTimeField(
-        verbose_name='Дата и время публикации',
+        verbose_name='Date and time of publication',
         help_text=(
-            'Если установить '
-            'дату и время в будущем — '
-            'можно делать отложенные публикации.'
+            'If you set the date and time in the future,'
+            ' you can make scheduled publications.'
         )
     )
     author = ForeignKey(
         get_user_model(),
         related_name='posts',
         on_delete=CASCADE,
-        verbose_name='Автор публикации'
+        verbose_name='Author of the publication'
     )
     location = ForeignKey(
         Location,
         related_name='posts',
         on_delete=SET_NULL,
         null=True,
-        verbose_name='Местоположение'
+        verbose_name='Location'
     )
     category = ForeignKey(
         Category,
         related_name='posts',
         on_delete=SET_NULL,
         null=True,
-        verbose_name='Категория'
+        verbose_name='Category'
     )
 
     class Meta:
         ordering = ('-pub_date',)
-        verbose_name = 'публикация'
-        verbose_name_plural = 'Публикации'
+        verbose_name = 'Publication'
+        verbose_name_plural = 'Publication'
 
     @cut_str
     def __str__(self):
@@ -118,20 +114,19 @@ class Post(PublishedCreatedModel):
 
 
 class Comment(CreatedModel):
-    text = TextField(verbose_name='Текст')
+    text = TextField(verbose_name='Text')
     author = ForeignKey(get_user_model(),
                         related_name='comments',
                         on_delete=CASCADE,
-                        verbose_name='Автор')
+                        verbose_name='Author')
     post = ForeignKey(Post,
                       related_name='comments',
                       on_delete=CASCADE,
-                      verbose_name='Публикация')
+                      verbose_name='Post')
 
     class Meta:
         ordering = ('created_at',)
-        verbose_name = 'комментарий'
-        verbose_name_plural = 'Комментарии'
+        verbose_name = 'comment'
 
     @cut_str
     def __str__(self):

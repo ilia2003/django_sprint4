@@ -44,9 +44,9 @@ class ProfileDetailView(ListView):
                 .filter(author=author))
 
     def get_context_data(self, **kwargs):
-        ontext_data = super().get_context_data(**kwargs)
-        ontext_data['profile'] = self.get_author()
-        return ontext_data
+        context_data = super().get_context_data(**kwargs)
+        context_data['profile'] = self.get_author()
+        return context_data
 
 
 class ProfileUpdateView(LoginRequiredMixin,
@@ -118,7 +118,7 @@ class PostDetailView(DetailView):
                 and (not post.is_published
                      or not post.category.is_published
                      or post.pub_date > timezone.now())):
-            raise Http404('Пост не найден')
+            raise Http404('Post not found')
         return post
 
     def get_context_data(self, **kwargs):
