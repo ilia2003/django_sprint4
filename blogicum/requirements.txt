@@ -34,4 +34,4 @@ tomli==2.0.1
 typing_extensions==4.9.0
 webencodings==0.5.1
 whitenoise==6.6.0
-yapf==0.32.0
+yapf==0.32.0  

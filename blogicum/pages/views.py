@@ -14,4 +14,4 @@ def page_not_found(request: HttpRequest,
 
 
 def server_error(request: HttpRequest):
-    return render(request, 'pages/500.html', status=500)
+    return render(request, 'pages/500.html', status=500)  
